@@ -9,22 +9,26 @@ def showMenu():
     print("4. Delete task")
     print("5. Close")
     print("--------------------")
-    return input("Chose a option: ")
+    return int(input("Chose a option: "))
+
+
 
 while True:
-    
-    print(showMenu())
-    
-    option = showMenu
+
+    option = showMenu()
+    print(option==int)
     
     match option:
         case 1:
-            pass
+            print(1)
         case 2:
-            pass
+            print(12)
         case 3:
             pass
         case 4:
             pass
         case 5:
             break
+        case _:
+            print("Invalid input. Try again...")
+            input()
