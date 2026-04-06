@@ -28,6 +28,14 @@ def Show_Menu():
     print("--------------------")
     return input("Chose a option: ")
 
+def List_Tasks():
+    print("1. All tasks")
+    print("2. Todo tasks")
+    print("3. In progress tasks")
+    print("4. Finished tasks")
+    
+    
+
 def Add_Task():
     currentId = Get_Last_ID()
     currentTask = {
