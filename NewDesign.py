@@ -2,9 +2,11 @@ import json
 from datetime import datetime
 from pathlib import Path
 
+# find the script path
 script_dir = Path(__file__).parent
 
 def Get_Last_ID():
+    # Create a IdCount file to track the current id, if the file don't exist it creates
     while True:
         try:
             with open(script_dir/"data/IdCount.txt", "r+") as f:
@@ -19,6 +21,7 @@ def Get_Last_ID():
     return currentId
 
 def Help(command):
+    # Help command to get a list of the possible commands
     try:
         match command[1]:
             case "add":
@@ -36,6 +39,7 @@ def Help(command):
             case _:
                 print("invalid input. Try again...\n")
     except IndexError:
+        # Specific search
         print(
             "=" * 82,
             "\nAll commands:\n",
@@ -48,10 +52,12 @@ def Help(command):
             ("=" * 82)
             )
 def Add_Task(command):
+    # Detects if the user passed a description
     try:
         description = command[2]
-    except:
+    except IndexError:
         description = "Description empty"
+
     try:
         currentId = Get_Last_ID()
         currentTask = {
