@@ -6,9 +6,6 @@ import shlex
 # find the script path
 script_dir = Path(__file__).parent
 
-def Get_List():
-    pass
-
 def Get_Last_ID():
     # Create a IdCount file to track the current id, if the file don't exist it creates
     while True:
@@ -48,7 +45,7 @@ def Help(option):
             "=" * 82,
             "\nAll commands:\n",
             "add    [task_title] (task_description) - adds a task\n",
-            "list   [Filter]                         - list tasks\n",
+            "list   [Filter]                        - list tasks\n",
             "update [class] [new_title] [id]        - updates a task\n",
             "delete [id]                            - delete a task\n",
             "mark   [new_status] [id]               - marks a task as done, todo or in progess\n",
@@ -59,7 +56,31 @@ def Help(option):
 def List_Tasks(option):
         with open(script_dir/"data/TaskList.json", "r") as f:
             taskList = json.load(f)
-        print(taskList)
+        if len(option) == 1:
+            for i in taskList["Tasks"]:
+                print(
+                    "="*50,"\n",
+                    "Title:",i["title"],"\n",
+                    "Description:",i["description"],"\n",
+                    "Status:", i["status"],"\n"
+                    " Created at:", i["createdAt"],"\n"
+                    " Last updated at:", i["lastUpdatedAt"],"\n",
+                    "ID:",i["id"],
+                    )
+        elif len(option) == 2 and option[1] in ["todo", "done", "working"]:
+            for i in taskList["Tasks"]:
+                if i["status"] == option[1]:
+                    print(
+                        "="*50,"\n",
+                        "Title:",i["title"],"\n",
+                        "Description:",i["description"],"\n",
+                        "Status:", i["status"],"\n"
+                        " Created at:", i["createdAt"],"\n"
+                        " Last updated at:", i["lastUpdatedAt"],"\n",
+                        "ID:",i["id"],
+                        )
+        else:
+            print("Invalid input. Try again...")
         
 
 def Add_Task(option):
@@ -70,30 +91,39 @@ def Add_Task(option):
         description = "Description empty"
 
     try:
+        taskList = {"Tasks":[]}
+
         currentId = Get_Last_ID()
         currentTask = {
             "id": currentId,
             "title": option[1],
             "description": description,
-            "stauts": "todo",
+            "status": "todo",
             "createdAt": datetime.now().strftime("%Y-%m-%d %I:%M %p"),
-            "lastUpdateAt": datetime.now().strftime("%Y-%m-%d %I:%M %p")
+            "lastUpdatedAt": datetime.now().strftime("%Y-%m-%d %I:%M %p")
         }
-        
-        TaskList = {"Tasks": [currentTask]}
 
-        with open(script_dir/"data/TaskList.json", "w") as f:
-            json.dump(TaskList, f, indent= 2)
+        try:
+            with open(script_dir/"data/TaskList.json", "r") as f:
+                if f.read().strip():
+                    f.seek(0)
+                    taskList = json.load(f)
+            with open(script_dir/"data/TaskList.json", "w+") as f:
+                taskList["Tasks"].append(currentTask)
+                json.dump(taskList,f, indent=2)
+        except FileNotFoundError:
+            print("File Not Found Error")
         print(f"Task added successfully! (Id {currentId})")
     except IndexError:
         print("Invalid input. Try again...")
 
 while True:
     commandInputs = input("-> ").lower()
-    command = shlex.split(commandInputs, posix=False)
+    
     try:
+        command = shlex.split(commandInputs, posix=False)
         mainCommand = command[0]
-    except IndexError:
+    except ValueError:
         mainCommand = "Invalid input"
 
     match mainCommand:
