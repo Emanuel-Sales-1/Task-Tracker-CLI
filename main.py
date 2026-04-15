@@ -6,11 +6,20 @@ import shlex
 # find the script path
 script_dir = Path(__file__).parent
 taskList = {"Tasks":[]}
+
+try:
+    with open(script_dir/"data/TaskList.json", "x") as f:
+        pass
+except FileExistsError:
+    pass
+
 def ReadFile():
     with open(script_dir/"data/TaskList.json", "r") as f:
         if f.read().strip():
             f.seek(0)
             newFile = json.load(f)
+        else:
+            newFile = taskList
     return newFile
 
 def Get_Last_ID():
@@ -74,6 +83,7 @@ def List_Tasks(option):
                     " Last updated at:", i["lastUpdatedAt"],"\n",
                     "ID:",i["id"],
                     )
+            print("="*50)
         elif len(option) == 2 and option[1] in ["todo", "done", "in-progress"]:
             for i in taskList["Tasks"]:
                 if i["status"] == option[1]:
@@ -86,6 +96,7 @@ def List_Tasks(option):
                         " Last updated at:", i["lastUpdatedAt"],"\n",
                         "ID:",i["id"],
                         )
+            print("="*50)
         else:
             print("Invalid input. Try again...")
         
@@ -109,10 +120,7 @@ def Add_Task(option):
         }
 
         try:
-            with open(script_dir/"data/TaskList.json", "r") as f:
-                if f.read().strip():
-                    f.seek(0)
-                    taskList = json.load(f)
+            taskList = ReadFile()
             with open(script_dir/"data/TaskList.json", "w+") as f:
                 taskList["Tasks"].append(currentTask)
                 json.dump(taskList,f, indent=2)
@@ -124,13 +132,42 @@ def Add_Task(option):
 
 def Delete_task(option):
     taskList = ReadFile()
-    if len(option) == 2:
+    try:
+        temp = taskList["Tasks"]
         taskList["Tasks"] = [i for i in taskList["Tasks"] if i["id"] != int(option[1])]
-    else:
+        if temp == taskList["Tasks"]:
+            print("Id out of range")
+        else:
+            print(f"Delete tasks successfully! (Id: {option[1]})")
+    except:
         print("Invalid input. Try again...")
     with open(script_dir/"data/TaskList.json", "w+") as f:
         json.dump(taskList, f, indent=2)
 
+def Update_task(option):
+    taskList = ReadFile()
+    if len(option) > 3:
+        return print("Invalid input. Try again...")
+    try:
+        taskList["Tasks"][next((i for i, item in enumerate(taskList["Tasks"]) if item["id"] == int(option[1])),None)]["title"] = option[2]
+        with open(script_dir/"data/TaskList.json", "w+") as f:
+            json.dump(taskList, f, indent=2)
+        print(f"Updated task successfully! (Id: {option[1]})")
+    except:
+        print("Invalid input. Try again...")
+
+def mark(option):
+    taskList = ReadFile()
+    if len(option) > 3 or option[2] not in ["todo", "done", "in-progress"]:
+        return print("Invalid input. Try again...")
+
+    try:
+        taskList["Tasks"][next((i for i, item in enumerate(taskList["Tasks"]) if item["id"] == int(option[1])),None)]["status"] = option[2]
+        with open(script_dir/"data/TaskList.json", "w+") as f:
+            json.dump(taskList, f, indent=2)
+        print(f"Marked task successfully! (Id: {option[1]})")
+    except:
+        print("Invalid input. Try again...")
 
 while True:
     commandInputs = input("-> ").lower()
@@ -149,17 +186,11 @@ while True:
         case "list":
             List_Tasks(command)
         case "update":
-            try:
-                command[1]
-            except IndexError:
-                print("Invalid input. Try again...")
+            Update_task(command)
         case "delete":
             Delete_task(command)
         case "mark":
-            try:
-                command[1]
-            except IndexError:
-                print("Invalid input. Try again...")
+            mark(command)
         case "exit":
             break
         case _:
