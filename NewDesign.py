@@ -67,7 +67,7 @@ def List_Tasks(option):
                     " Last updated at:", i["lastUpdatedAt"],"\n",
                     "ID:",i["id"],
                     )
-        elif len(option) == 2 and option[1] in ["todo", "done", "working"]:
+        elif len(option) == 2 and option[1] in ["todo", "done", "in-progress"]:
             for i in taskList["Tasks"]:
                 if i["status"] == option[1]:
                     print(
