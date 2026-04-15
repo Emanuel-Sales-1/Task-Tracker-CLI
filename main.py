@@ -5,6 +5,13 @@ import shlex
 
 # find the script path
 script_dir = Path(__file__).parent
+taskList = {"Tasks":[]}
+def ReadFile():
+    with open(script_dir/"data/TaskList.json", "r") as f:
+        if f.read().strip():
+            f.seek(0)
+            newFile = json.load(f)
+    return newFile
 
 def Get_Last_ID():
     # Create a IdCount file to track the current id, if the file don't exist it creates
@@ -91,8 +98,6 @@ def Add_Task(option):
         description = "Description empty"
 
     try:
-        taskList = {"Tasks":[]}
-
         currentId = Get_Last_ID()
         currentTask = {
             "id": currentId,
@@ -117,6 +122,16 @@ def Add_Task(option):
     except IndexError:
         print("Invalid input. Try again...")
 
+def Delete_task(option):
+    taskList = ReadFile()
+    if len(option) == 2:
+        taskList["Tasks"] = [i for i in taskList["Tasks"] if i["id"] != int(option[1])]
+    else:
+        print("Invalid input. Try again...")
+    with open(script_dir/"data/TaskList.json", "w+") as f:
+        json.dump(taskList, f, indent=2)
+
+
 while True:
     commandInputs = input("-> ").lower()
     
@@ -139,10 +154,7 @@ while True:
             except IndexError:
                 print("Invalid input. Try again...")
         case "delete":
-            try:
-                command[1]
-            except IndexError:
-                print("Invalid input. Try again...")
+            Delete_task(command)
         case "mark":
             try:
                 command[1]
